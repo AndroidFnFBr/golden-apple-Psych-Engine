@@ -1,34 +1,26 @@
 package;
 
-import flixel.FlxG;
-import openfl.utils.Assets;
-import lime.utils.Assets as LimeAssets;
-import lime.utils.AssetLibrary;
-import lime.utils.AssetManifest;
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#else
-import openfl.utils.Assets;
-#end
+import lime.utils.Assets;
 
 using StringTools;
 
 class CoolUtil
 {
-	// [Difficulty name, Chart file suffix]
-	public static var difficultyStuff:Array<Dynamic> = [
-		['Easy', '-easy'],
-		['Normal', ''],
-		['Hard', '-hard']
-	];
+	public static var difficultyArray:Array<String> = ['EASY', "NORMAL", "HARD","LEGACY"];
 
 	public static function difficultyString():String
 	{
-		return difficultyStuff[PlayState.storyDifficulty][0].toUpperCase();
+		switch (PlayState.storyWeek)
+		{
+			case 3:
+				return 'FINALE';
+			default:
+				return difficultyArray[PlayState.storyDifficulty];
+		}
 	}
 
-	public static function boundTo(value:Float, min:Float, max:Float):Float {
+	public static function boundTo(value:Float, min:Float, max:Float):Float
+	{
 		var newValue:Float = value;
 		if(newValue < min) newValue = min;
 		else if(newValue > max) newValue = max;
@@ -37,12 +29,7 @@ class CoolUtil
 
 	public static function coolTextFile(path:String):Array<String>
 	{
-		var daList:Array<String> = [];
-		#if windows
-		if(FileSystem.exists(path)) daList = File.getContent(path).trim().split('\n');
-		#else
-		if(Assets.exists(path)) daList = Assets.getText(path).trim().split('\n');
-		#end
+		var daList:Array<String> = Assets.getText(path).trim().split('\n');
 
 		for (i in 0...daList.length)
 		{
@@ -51,8 +38,21 @@ class CoolUtil
 
 		return daList;
 	}
+	
+	public static function coolStringFile(path:String):Array<String>
+		{
+			var daList:Array<String> = path.trim().split('\n');
+	
+			for (i in 0...daList.length)
+			{
+				daList[i] = daList[i].trim();
+			}
+	
+			return daList;
+		}
 
-	public static function dominantColor(sprite:flixel.FlxSprite):Int{
+	public static function dominantColor(sprite:flixel.FlxSprite):Int
+	{
 		var countByColor:Map<Int, Int> = [];
 		for(col in 0...sprite.frameWidth){
 			for(row in 0...sprite.frameHeight){
@@ -87,19 +87,23 @@ class CoolUtil
 		}
 		return dumbArray;
 	}
-
-	//uhhhh does this even work at all? i'm starting to doubt
-	public static function precacheSound(sound:String, ?library:String = null):Void {
-		if(!Assets.cache.hasSound(Paths.sound(sound, library))) {
-			FlxG.sound.cache(Paths.sound(sound, library));
+	public static function formatString(string:String):String
+		{
+			 var split:Array<String> = string.split('-');
+			 var formattedString:String = '';
+			 for (i in 0...split.length) 
+			 {
+				  var piece:String = split[i];
+				  var allSplit = piece.split('');
+				  var firstLetterUpperCased = allSplit[0].toUpperCase();
+				  var substring = piece.substr(1, piece.length - 1);
+				  var newPiece = firstLetterUpperCased + substring;
+				  if (i != split.length - 1)
+				  {
+						newPiece += " ";
+				  }
+				  formattedString += newPiece;
+			 }
+			 return formattedString;
 		}
-	}
-
-	public static function browserLoad(site:String) {
-		#if linux
-		Sys.command('/usr/bin/xdg-open', [site]);
-		#else
-		FlxG.openURL(site);
-		#end
-	}
 }
